@@ -170,31 +170,34 @@ button[type="submit"]:hover,
 
 .user-type-selector {
   display: flex;
-  border: 1px solid #ddd;
+  justify-content: center; 
+  margin: 2rem auto; 
+  position: relative;
+  background-color: #f0f0f0;
   border-radius: 8px;
-  overflow: hidden;
-  margin-top: 1rem;
+  width: fit-content;
+  padding: 0;
 }
 
 .user-type-btn {
-  flex: 1;
-  padding: 10px;
-  background-color: #f8f9fa;
-  color: #555;
-  border-radius: 0;
+  padding: 20px 25px;
+  font-size: 1rem;
+  background-color: transparent; 
+  border: none;
+  cursor: pointer;
+  transition: all 0.3s ease;
   font-weight: 500;
+  position: relative;
+  z-index: 1;
 }
 
 .user-type-btn.active {
   background-color: #df8ecc;
   color: white;
   font-weight: 600;
-}
-
-.user-type-btn:hover:not(.active) {
-  background-color: #e9ecef;
-  transform: none; 
-  box-shadow: none;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  z-index: 2; 
 }
 
 .error-message {

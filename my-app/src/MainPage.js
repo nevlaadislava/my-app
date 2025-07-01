@@ -13,6 +13,7 @@ function MainPage() {
   });
   const [userType, setUserType] = useState('user');
   const navigate = useNavigate();
+  
 
   const handleChange = (e) => {
     const { name, value } = e.target;

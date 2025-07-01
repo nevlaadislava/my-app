@@ -11,6 +11,7 @@ from starlette.staticfiles import StaticFiles
 from openpyxl.drawing.image import Image as OpenpyxlImage
 
 from database import ActivityRequest, init_db, get_db
+from database import SessionLocal
 
 
 init_db()
