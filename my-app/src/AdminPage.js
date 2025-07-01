@@ -50,12 +50,38 @@ function AdminPage() {
     navigate('/');
   };
 
+  const handleExportExcel = async () => {
+    try {
+      const response = await fetch('http://localhost:8000/api/activities/download');
+      if (!response.ok) {
+        throw new Error('Ошибка при экспорте данных');
+      }
+      
+      const blob = await response.blob();
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `activity_report_${new Date().toISOString().slice(0, 10)}.xlsx`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      window.URL.revokeObjectURL(url);
+    } catch (error) {
+      console.error('Ошибка при экспорте в Excel:', error);
+      alert('Произошла ошибка при экспорте данных');
+    }
+  };
+  
   return (
     <div className="admin-page-container">
       <div className="admin-header">
         <h1>Панель администратора</h1>
       </div>
-
+      <div className="button-group">
+  <button onClick={handleExportExcel} className="export-btn">
+    Экспорт в Excel
+  </button>
+</div>
       <div className="activities-sections">
         <div className="pending-activities">
           <h2>Заявки на рассмотрении</h2>

@@ -86,6 +86,22 @@ function MainPage() {
 };
   return (
     <div className="main-page-container">
+      <div className="user-type-selector">
+          <button 
+            className={`user-type-btn ${userType === 'user' ? 'active' : ''}`}
+            onClick={() => handleUserTypeChange('user')}
+            type="button"
+          >
+            Пользователь
+          </button>
+          <button 
+            className={`user-type-btn ${userType === 'admin' ? 'active' : ''}`}
+            onClick={() => handleUserTypeChange('admin')}
+            type="button"
+          >
+            Администратор
+          </button>
+        </div>
       <div className="form-header">Регистрация</div>
       <form className="form-content" onSubmit={handleSubmit}>
         <div className="form-row">
@@ -165,23 +181,6 @@ function MainPage() {
         
         <div className="form-row">
           <button type="submit">Отправить</button>
-
-        <div className="user-type-selector">
-          <button 
-            className={`user-type-btn ${userType === 'user' ? 'active' : ''}`}
-            onClick={() => handleUserTypeChange('user')}
-            type="button"
-          >
-            Пользователь
-          </button>
-          <button 
-            className={`user-type-btn ${userType === 'admin' ? 'active' : ''}`}
-            onClick={() => handleUserTypeChange('admin')}
-            type="button"
-          >
-            Администратор
-          </button>
-        </div>
         </div>
       </form>
     </div>

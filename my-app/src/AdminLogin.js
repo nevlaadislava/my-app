@@ -38,6 +38,7 @@ function AdminLogin() {
     navigate('/'); // Переход на главную страницу регистрации
   };
 
+
     const handleUserTypeChange = (type) => {
         setUserType(type);
         if (type === 'user') {
@@ -47,6 +48,22 @@ function AdminLogin() {
 
   return (
     <div className="login-container">
+      <div className="user-type-selector">
+          <button 
+            className={`user-type-btn ${userType === 'user' ? 'active' : ''}`}
+            onClick={() => handleUserTypeChange('user')}
+            type="button"
+          >
+            Пользователь
+          </button>
+          <button 
+            className={`user-type-btn ${userType === 'admin' ? 'active' : ''}`}
+            onClick={() => handleUserTypeChange('admin')}
+            type="button"
+          >
+            Администратор
+          </button>
+        </div>
       <h1>Вход для администратора</h1>
       <form onSubmit={handleSubmit}>
         <div className="form-group">
@@ -72,23 +89,6 @@ function AdminLogin() {
         {error && <div className="error-message">{error}</div>}
         <div className="button-group">
           <button type="submit" className="submit-btn">Войти</button>
-        </div>
-
-        <div className="user-type-selector">
-          <button 
-            className={`user-type-btn ${userType === 'user' ? 'active' : ''}`}
-            onClick={() => handleUserTypeChange('user')}
-            type="button"
-          >
-            Пользователь
-          </button>
-          <button 
-            className={`user-type-btn ${userType === 'admin' ? 'active' : ''}`}
-            onClick={() => handleUserTypeChange('admin')}
-            type="button"
-          >
-            Администратор
-          </button>
         </div>
       </form>
     </div>
