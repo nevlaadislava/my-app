@@ -44,53 +44,50 @@ function MainPage() {
     }
   };
 
-   const handleSubmit = async (e) => {
-    e.preventDefault();
-    const formDataToSend = new FormData();
-    Object.entries(formData).forEach(([key, value]) => {
-      if (value) formDataToSend.append(key, value);
+  const handleSubmit = async (e) => {
+  e.preventDefault();
+  const formDataToSend = new FormData();
+  formDataToSend.append('firstname', formData.firstname);
+  formDataToSend.append('secondname', formData.secondname);
+  formDataToSend.append('patronymic', formData.patronymic);
+  formDataToSend.append('group', formData.group);
+  formDataToSend.append('supervisor', formData.supervisor);
+  formDataToSend.append('activity', formData.activity);
+  formDataToSend.append('photo', formData.photo);
+
+  try {
+    const response = await fetch('http://localhost:8000/api/activities', {
+      method: 'POST',
+      body: formDataToSend,
     });
-
-    try {
-      const response = await fetch('http://localhost:8000/api/activities', {
-        method: 'POST',
-        body: formDataToSend,
-      });
-      const data = await response.json();
-      alert(`Данные сохранены: ${JSON.stringify(data)}`);
-      
-      setFormData({
-        firstname: '',
-        secondname: '',
-        patronymic: '',
-        group: '',
-        supervisor: '',
-        activity: '',
-        photo: null
-      });
-      document.querySelector('input[type="file"]').value = '';
-    } catch (error) {
-      console.error('Ошибка:', error);
+    
+    if (!response.ok) {
+      throw new Error('Ошибка сервера');
     }
-  };
-
+    
+    const data = await response.json();
+    alert('Заявка успешно отправлена!');
+    
+    // Сброс формы после успешной отправки
+    setFormData({
+      firstname: '',
+      secondname: '',
+      patronymic: '',
+      group: '',
+      supervisor: '',
+      activity: '',
+      photo: null
+    });
+    document.querySelector('input[type="file"]').value = '';
+    
+  } catch (error) {
+    console.error('Ошибка:', error);
+    alert('Произошла ошибка при отправке заявки');
+  }
+};
   return (
     <div className="main-page-container">
-      <div className="form-header">Регистрация студента</div>
-      <div className="user-type-selector">
-        <button 
-          className={`user-type-btn ${userType === 'user' ? 'active' : ''}`}
-          onClick={() => handleUserTypeChange('user')}
-        >
-          Пользователь
-        </button>
-        <button 
-          className={`user-type-btn ${userType === 'admin' ? 'active' : ''}`}
-          onClick={() => handleUserTypeChange('admin')}
-        >
-          Администратор
-        </button>
-      </div>
+      <div className="form-header">Регистрация</div>
       <form className="form-content" onSubmit={handleSubmit}>
         <div className="form-row">
           <label>Фамилия:</label>
@@ -169,6 +166,23 @@ function MainPage() {
         
         <div className="form-row">
           <button type="submit">Зарегистрироваться</button>
+
+        <div className="user-type-selector">
+          <button 
+            className={`user-type-btn ${userType === 'user' ? 'active' : ''}`}
+            onClick={() => handleUserTypeChange('user')}
+            type="button"
+          >
+            Пользователь
+          </button>
+          <button 
+            className={`user-type-btn ${userType === 'admin' ? 'active' : ''}`}
+            onClick={() => handleUserTypeChange('admin')}
+            type="button"
+          >
+            Администратор
+          </button>
+        </div>
         </div>
       </form>
     </div>

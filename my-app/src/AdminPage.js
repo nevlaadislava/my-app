@@ -1,8 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import jsPDF from 'jspdf';
+import 'jspdf-autotable';
 
 function AdminPage() {
-  const [activities, setActivities] = useState([]);
+  const [pendingActivities, setPendingActivities] = useState([]);
+  const [approvedActivities, setApprovedActivities] = useState([]);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -10,7 +13,8 @@ function AdminPage() {
       try {
         const response = await fetch('http://localhost:8000/api/activities');
         const data = await response.json();
-        setActivities(data);
+        setPendingActivities(data.filter(a => a.status === "pending"));
+        setApprovedActivities(data.filter(a => a.status === "approved"));
       } catch (error) {
         console.error('Ошибка при загрузке данных:', error);
       }
@@ -18,6 +22,29 @@ function AdminPage() {
     
     fetchActivities();
   }, []);
+
+  const handleApprove = async (activity) => {
+    try {
+      await fetch(`http://localhost:8000/api/activities/${activity.id}/approve`, {
+        method: 'PUT',
+      });
+      setPendingActivities(prev => prev.filter(a => a.id !== activity.id));
+      setApprovedActivities(prev => [...prev, {...activity, status: "approved"}]);
+    } catch (error) {
+      console.error('Ошибка при одобрении заявки:', error);
+    }
+  };
+
+  const handleReject = async (activity) => {
+    try {
+      await fetch(`http://localhost:8000/api/activities/${activity.id}`, {
+        method: 'DELETE',
+      });
+      setPendingActivities(prev => prev.filter(a => a.id !== activity.id));
+    } catch (error) {
+      console.error('Ошибка при отклонении заявки:', error);
+    }
+  };
 
   const handleLogout = () => {
     navigate('/');
@@ -27,51 +54,99 @@ function AdminPage() {
     <div className="admin-page-container">
       <div className="admin-header">
         <h1>Панель администратора</h1>
+      </div>
+
+      <div className="activities-sections">
+        <div className="pending-activities">
+          <h2>Заявки на рассмотрении</h2>
+          {pendingActivities.length > 0 ? (
+            <table>
+              <thead>
+                <tr>
+                  <th>ФИО</th>
+                  <th>Группа</th>
+                  <th>Руководитель</th>
+                  <th>Активность</th>
+                  <th>Фото</th>
+                  <th>Действия</th>
+                </tr>
+              </thead>
+              <tbody>
+                {pendingActivities.map((activity) => (
+                  <tr key={`pending-${activity.id}`}>
+                    <td>{activity.full_name}</td>
+                    <td>{activity.group_name}</td>
+                    <td>{activity.supervisor}</td>
+                    <td>{activity.activity}</td>
+                    <td>
+                      {activity.file_name && (
+                        <img 
+                          src={`http://localhost:8000/uploads/${activity.file_name}`} 
+                          alt="Достижение" 
+                          width="100"
+                        />
+                      )}
+                    </td>
+                    <td>
+                      <button onClick={() => handleApprove(activity)} className="approve-btn">
+                        Принять
+                      </button>
+                      <button onClick={() => handleReject(activity)} className="reject-btn">
+                        Отклонить
+                      </button>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          ) : (
+            <p>Нет заявок на рассмотрении</p>
+          )}
+        </div>
+
+        <div className="approved-activities">
+          <h2>Принятые заявки</h2>
+          {approvedActivities.length > 0 ? (
+            <table>
+              <thead>
+                <tr>
+                  <th>ФИО</th>
+                  <th>Группа</th>
+                  <th>Руководитель</th>
+                  <th>Активность</th>
+                  <th>Фото</th>
+                </tr>
+              </thead>
+              <tbody>
+                {approvedActivities.map((activity) => (
+                  <tr key={`approved-${activity.id}`}>
+                    <td>{activity.full_name}</td>
+                    <td>{activity.group_name}</td>
+                    <td>{activity.supervisor}</td>
+                    <td>{activity.activity}</td>
+                    <td>
+                      {activity.file_name && (
+                        <img 
+                          src={`http://localhost:8000/uploads/${activity.file_name}`} 
+                          alt="Достижение" 
+                          width="300"
+                        />
+                      )}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          ) : (
+            <p>Нет принятых заявок</p>
+          )}
+        </div>
         <button 
           onClick={handleLogout}
           className="logout-btn"
         >
           Выйти в меню регистрации
         </button>
-      </div>
-
-      <div className="activities-list">
-        <h2>Зарегистрированные студенты</h2>
-        {activities.length > 0 ? (
-          <table>
-            <thead>
-              <tr>
-                <th>ФИО</th>
-                <th>Группа</th>
-                <th>Руководитель</th>
-                <th>Активность</th>
-                <th>Фото</th>
-              </tr>
-            </thead>
-            <tbody>
-              {activities.map((activity, index) => (
-                <tr key={index}>
-                  <td>{activity.firstname} {activity.secondname} 
-      {activity.patronymic && ` ${activity.patronymic}`}</td>
-                  <td>{activity.group}</td>
-                  <td>{activity.supervisor}</td>
-                  <td>{activity.activity}</td>
-                  <td>
-                    {activity.photo_filename && (
-                      <img 
-                        src={`http://localhost:8000/uploads/${activity.photo_filename}`} 
-                        alt="Студент" 
-                        width="100"
-                      />
-                    )}
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        ) : (
-          <p>Нет зарегистрированных студентов</p>
-        )}
       </div>
     </div>
   );

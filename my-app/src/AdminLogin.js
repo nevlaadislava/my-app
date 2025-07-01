@@ -8,10 +8,11 @@ function AdminLogin() {
   });
   const [error, setError] = useState('');
   const navigate = useNavigate();
+  const [userType, setUserType] = useState('admin');
 
   const validCredentials = [
     { login: 'nevlaadislava', password: 'pass1' },
-    { login: 'sunnlxx', password: 'pass2' },
+    { login: 'sunnlxx', password: 'pikmi' },
     { login: 'dimka', password: 'pass3' }
   ];
 
@@ -37,6 +38,12 @@ function AdminLogin() {
     navigate('/'); // Переход на главную страницу регистрации
   };
 
+    const handleUserTypeChange = (type) => {
+        setUserType(type);
+        if (type === 'user') {
+            navigate('/');
+        }
+    };
 
   return (
     <div className="login-container">
@@ -65,12 +72,22 @@ function AdminLogin() {
         {error && <div className="error-message">{error}</div>}
         <div className="button-group">
           <button type="submit" className="submit-btn">Войти</button>
+        </div>
+
+        <div className="user-type-selector">
           <button 
-            type="button" 
-            className="exit-btn"
-            onClick={handleExit}
+            className={`user-type-btn ${userType === 'user' ? 'active' : ''}`}
+            onClick={() => handleUserTypeChange('user')}
+            type="button"
           >
-            Вернуться к регистрации
+            Пользователь
+          </button>
+          <button 
+            className={`user-type-btn ${userType === 'admin' ? 'active' : ''}`}
+            onClick={() => handleUserTypeChange('admin')}
+            type="button"
+          >
+            Администратор
           </button>
         </div>
       </form>

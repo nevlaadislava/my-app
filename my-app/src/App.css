@@ -1,4 +1,4 @@
-/* App.css */
+
 body {
   font-family: Arial, sans-serif;
   margin: 0;
@@ -54,3 +54,29 @@ input {
   background-color: #45a049;
 }
 
+.user-type-selector {
+  display: flex;
+  margin-top: 20px;
+  gap: 10px;
+}
+
+.user-type-btn {
+  flex: 1;
+  padding: 10px;
+  border: 1px solid #ddd;
+  background-color: #f5f5f5;
+  cursor: pointer;
+  border-radius: 4px;
+  text-align: center;
+  transition: all 0.3s;
+}
+
+.user-type-btn.active {
+  background-color: #4CAF50;
+  color: white;
+  border-color: #4CAF50;
+}
+
+.login-container .user-type-selector {
+  margin-top: 20px;
+}
