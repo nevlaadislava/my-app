@@ -68,7 +68,6 @@ function MainPage() {
     const data = await response.json();
     alert('Заявка успешно отправлена!');
     
-    // Сброс формы после успешной отправки
     setFormData({
       firstname: '',
       secondname: '',
@@ -165,7 +164,7 @@ function MainPage() {
         </div>
         
         <div className="form-row">
-          <button type="submit">Зарегистрироваться</button>
+          <button type="submit">Отправить</button>
 
         <div className="user-type-selector">
           <button 

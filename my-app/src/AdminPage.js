@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import jsPDF from 'jspdf';
-import 'jspdf-autotable';
+// import jsPDF from 'jspdf';
+// import 'jspdf-autotable';
 
 function AdminPage() {
   const [pendingActivities, setPendingActivities] = useState([]);
