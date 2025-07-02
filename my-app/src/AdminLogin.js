@@ -1,6 +1,8 @@
-// AdminLogin.js
+
+
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+
+import { useNavigate, Link } from 'react-router-dom';
 
 function AdminLogin() {
   const [credentials, setCredentials] = useState({
@@ -11,18 +13,14 @@ function AdminLogin() {
   const navigate = useNavigate();
   const [userType, setUserType] = useState('admin');
 
-  // УДАЛЯЕМ ЭТОТ МАССИВ - он больше не нужен
-  // const validCredentials = [ ... ];
-
   const handleChange = (e) => {
     const { name, value } = e.target;
     setCredentials(prev => ({ ...prev, [name]: value }));
   };
 
-  // ИЗМЕНЯЕМ ФУНКЦИЮ ОБРАБОТКИ ОТПРАВКИ ФОРМЫ
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setError(''); // Сбрасываем предыдущие ошибки
+    setError(''); 
 
     try {
       const response = await fetch('http://localhost:8000/api/login', {
@@ -33,23 +31,19 @@ function AdminLogin() {
         body: JSON.stringify(credentials),
       });
 
+      const data = await response.json();
+
       if (response.ok) {
-        // Если статус ответа 2xx (успех)
+
+        sessionStorage.setItem('userRole', data.role);
         navigate('/admin-panel');
       } else {
-        // Если сервер вернул ошибку (например, 401)
-        const errorData = await response.json();
-        setError(errorData.detail || 'Произошла ошибка входа');
+        setError(data.detail || 'Произошла ошибка входа');
       }
     } catch (err) {
-      // Если произошла сетевая ошибка (сервер недоступен)
       console.error('Login fetch error:', err);
       setError('Ошибка подключения к серверу. Попробуйте позже.');
     }
-  };
-
-  const handleExit = () => {
-    navigate('/'); // Переход на главную страницу регистрации
   };
 
   const handleUserTypeChange = (type) => {
@@ -81,29 +75,21 @@ function AdminLogin() {
       <form onSubmit={handleSubmit}>
         <div className="form-group">
           <label>Логин:</label>
-          <input
-            type="text"
-            name="login"
-            value={credentials.login}
-            onChange={handleChange}
-            required
-          />
+          <input type="text" name="login" value={credentials.login} onChange={handleChange} required />
         </div>
         <div className="form-group">
           <label>Пароль:</label>
-          <input
-            type="password"
-            name="password"
-            value={credentials.password}
-            onChange={handleChange}
-            required
-          />
+          <input type="password" name="password" value={credentials.password} onChange={handleChange} required />
         </div>
         {error && <div className="error-message">{error}</div>}
         <div className="button-group">
           <button type="submit" className="submit-btn">Войти</button>
         </div>
       </form>
+
+      <div className="link-to-register">
+        Нет аккаунта? <Link to="/admin-register">Подать заявку на регистрацию</Link>
+      </div>
     </div>
   );
 }
