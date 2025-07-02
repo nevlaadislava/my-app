@@ -1,12 +1,12 @@
 
 body {
   margin: 0;
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
+  font-family: 'Segoe UI', 'Roboto', 'Oxygen',
     'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
     sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  background-color: #f4f7f9; 
+  background-color: #f9f4f7; 
   color: #333;
 }
 
@@ -142,19 +142,19 @@ button[type="submit"]:hover,
 }
 
 .approve-btn {
-  background-color: #2ecc71;
+  background-color: #86daa9;
   color: white;
 }
 .approve-btn:hover {
-  background-color: #27ae60;
+  background-color: #5abb82;
 }
 
 .reject-btn {
-  background-color: #e74c3c;
+  background-color: #f1958b;
   color: white;
 }
 .reject-btn:hover {
-  background-color: #c0392b;
+  background-color: #bf6a61;
 }
 
 .logout-btn {
@@ -305,3 +305,110 @@ p {
   }
 }
 
+.activities-container {
+  display: flex;
+  gap: 2rem;
+  margin-top: 2rem;
+}
+
+.activities-column {
+  flex: 1;
+  background: #fafbfd;
+  border-radius: 12px;
+  padding: 1.5rem;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+}
+
+.pending-column {
+  border-top: 4px solid #ffc1f1;
+}
+
+.approved-column {
+  border-top: 4px solid #ffc1f1;
+}
+
+.activities-scrollable {
+  max-height: 600px;
+  overflow-y: auto;
+  padding-right: 10px;
+}
+
+.activity-card {
+  background: rgb(255, 255, 255);
+  border-radius: 8px;
+  padding: 1.5rem;
+  margin-bottom: 1.5rem;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.activity-card.pending {
+  border-left: 4px solid #ffc1f1;
+}
+
+.activity-card.approved {
+  border-left: 4px solid #ffc1f1;
+}
+
+.activity-info {
+  margin-bottom: 1rem;
+}
+
+.activity-info p {
+  margin: 0.5rem 0;
+  color: #333;
+  font-style: normal;
+}
+
+.activity-actions {
+  display: flex;
+  gap: 1rem;
+  margin-top: 1rem;
+}
+
+.activity-image {
+  max-width: 100%;
+  height: auto;
+  border-radius: 8px;
+  margin-top: 1rem;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+}
+
+.no-activities {
+  text-align: center;
+  color: #95a5a6;
+  padding: 2rem;
+}
+
+.export-btn {
+  background-color: #95a5a6;
+  color: white;
+  padding: 10px 20px;
+  border-radius: 8px;
+  border: none;
+  cursor: pointer;
+  font-weight: 600;
+  transition: all 0.2s ease;
+}
+
+.export-btn:hover {
+  background-color: #7f8c8d;
+  transform: translateY(-2px);
+}
+
+.activities-scrollable::-webkit-scrollbar {
+  width: 8px;
+}
+
+.activities-scrollable::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 4px;
+}
+
+.activities-scrollable::-webkit-scrollbar-thumb {
+  background: #e589ce;
+  border-radius: 4px;
+}
+
+.activities-scrollable::-webkit-scrollbar-thumb:hover {
+  background: #d17ebc;
+}

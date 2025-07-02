@@ -4,6 +4,7 @@ from sqlalchemy.orm import Session
 from fastapi.responses import StreamingResponse
 import pandas as pd
 from io import BytesIO
+from pydantic import BaseModel  
 from datetime import datetime
 import os
 from starlette.staticfiles import StaticFiles
@@ -26,14 +27,42 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+ADMIN_CREDENTIALS = {
+    "nevlaadislava": "pass1",
+    "sunnlxx": "pikmi",
+    "dimka": "pass3"
+}
+
+class UserCredentials(BaseModel):
+    login: str
+    password: str
+
+@app.post("/api/login")
+async def login_for_access(credentials: UserCredentials):
+    user_login = credentials.login
+    user_password = credentials.password
+    
+    if user_login in ADMIN_CREDENTIALS and ADMIN_CREDENTIALS[user_login] == user_password:
+        return {"message": "Login successful"}
+    
+    raise HTTPException(
+        status_code=401,
+        detail="Неверный логин или пароль",
+        headers={"WWW-Authenticate": "Bearer"},
+    )
+
+
+
+
+os.makedirs("uploads", exist_ok=True)
+app.mount("/uploads", StaticFiles(directory="uploads"), name="uploads")
+
 os.makedirs("uploads", exist_ok=True)
 app.mount("/uploads", StaticFiles(directory="uploads"), name="uploads")
 
 @app.get("/api/activities")
-async def get_activities():
-    db = SessionLocal()
+async def get_activities(db: Session = Depends(get_db)):
     activities = db.query(ActivityRequest).all()
-    db.close()
     return activities
 
 @app.post("/api/activities")
@@ -44,62 +73,64 @@ async def create_activity(
     group: str = Form(...),
     supervisor: str = Form(...),
     activity: str = Form(...),
-    photo: UploadFile = File(...)
+    photo: UploadFile = File(...),
+    db: Session = Depends(get_db)
 ):
     if photo.content_type not in ["image/jpeg", "image/png"]:
         raise HTTPException(status_code=400, detail="Только JPEG или PNG изображения разрешены")
 
-    file_location = f"uploads/{photo.filename}"
+    timestamp = datetime.now().strftime("%Y%m%d%H%M%S")
+    unique_filename = f"{timestamp}_{photo.filename}"
+    file_location = f"uploads/{unique_filename}"
+    
     with open(file_location, "wb+") as file_object:
         file_object.write(await photo.read())
 
-    db = SessionLocal()
     activity_data = ActivityRequest(
         full_name=f"{secondname} {firstname} {patronymic}".strip(),
         group_name=group,
         supervisor=supervisor,
         activity=activity,
-        file_name=photo.filename,
+        file_name=unique_filename,
         status="pending"
     )
     db.add(activity_data)
     db.commit()
     db.refresh(activity_data)
-    db.close()
 
     return activity_data
 
 @app.put("/api/activities/{activity_id}/approve")
-async def approve_activity(activity_id: int):
-    db = SessionLocal()
+async def approve_activity(activity_id: int, db: Session = Depends(get_db)):
     activity = db.query(ActivityRequest).filter(ActivityRequest.id == activity_id).first()
     if not activity:
-        db.close()
         raise HTTPException(status_code=404, detail="Activity not found")
 
     activity.status = "approved"
     db.commit()
-    db.close()
     return {"message": "Activity approved"}
 
 @app.delete("/api/activities/{activity_id}")
-async def delete_activity(activity_id: int):
-    db = SessionLocal()
+async def delete_activity(activity_id: int, db: Session = Depends(get_db)):
     activity = db.query(ActivityRequest).filter(ActivityRequest.id == activity_id).first()
+    
     if not activity:
-        db.close()
         raise HTTPException(status_code=404, detail="Activity not found")
-
+    file_to_delete_name = activity.file_name
     db.delete(activity)
     db.commit()
-    db.close()
-    return {"message": "Activity deleted"}
+    if file_to_delete_name:
+        file_path = os.path.join("uploads", file_to_delete_name)
+        if os.path.exists(file_path):
+            try:
+                os.remove(file_path)
+            except OSError as e:
+                print(f"Error deleting file {file_path}: {e}")
+
+    return {"message": "Activity and associated file deleted successfully"}
 
 @app.get("/api/activities/download")
 async def download_activities_excel(db: Session = Depends(get_db)):
-    """
-    Скачивает все данные по активностям в виде Excel-файла с встроенными изображениями.
-    """
     activities_query = db.query(ActivityRequest).order_by(ActivityRequest.created_at.desc()).all()
 
     if not activities_query:
@@ -150,7 +181,6 @@ async def download_activities_excel(db: Session = Depends(get_db)):
                     worksheet.add_image(img, cell_location)
                 except Exception as e:
                     print(f"Не удалось вставить изображение {image_path}: {e}")
-                    # Можно записать в ячейку сообщение об ошибке
                     worksheet[f'{image_col_letter}{index}'] = "Ошибка загрузки изображения"
 
     output_buffer.seek(0)

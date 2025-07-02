@@ -1,7 +1,5 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-// import jsPDF from 'jspdf';
-// import 'jspdf-autotable';
 
 function AdminPage() {
   const [pendingActivities, setPendingActivities] = useState([]);
@@ -46,6 +44,17 @@ function AdminPage() {
     }
   };
 
+  const handleDeleteApproved = async (activity) => {
+    try {
+      await fetch(`http://localhost:8000/api/activities/${activity.id}`, {
+        method: 'DELETE',
+      });
+      setApprovedActivities(prev => prev.filter(a => a.id !== activity.id));
+    } catch (error) {
+      console.error('Ошибка при удалении заявки:', error);
+    }
+  };
+
   const handleLogout = () => {
     navigate('/');
   };
@@ -82,98 +91,82 @@ function AdminPage() {
     Экспорт в Excel
   </button>
 </div>
-      <div className="activities-sections">
-        <div className="pending-activities">
-          <h2>Заявки на рассмотрении</h2>
-          {pendingActivities.length > 0 ? (
-            <table>
-              <thead>
-                <tr>
-                  <th>ФИО</th>
-                  <th>Группа</th>
-                  <th>Руководитель</th>
-                  <th>Активность</th>
-                  <th>Фото</th>
-                  <th>Действия</th>
-                </tr>
-              </thead>
-              <tbody>
-                {pendingActivities.map((activity) => (
-                  <tr key={`pending-${activity.id}`}>
-                    <td>{activity.full_name}</td>
-                    <td>{activity.group_name}</td>
-                    <td>{activity.supervisor}</td>
-                    <td>{activity.activity}</td>
-                    <td>
-                      {activity.file_name && (
-                        <img 
-                          src={`http://localhost:8000/uploads/${activity.file_name}`} 
-                          alt="Достижение" 
-                          width="100"
-                        />
-                      )}
-                    </td>
-                    <td>
-                      <button onClick={() => handleApprove(activity)} className="approve-btn">
-                        Принять
-                      </button>
-                      <button onClick={() => handleReject(activity)} className="reject-btn">
-                        Отклонить
-                      </button>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          ) : (
-            <p>Нет заявок на рассмотрении</p>
-          )}
+         
+ <div className="activities-container">
+        <div className="activities-column pending-column">
+          <h2>Заявки на рассмотрении ({pendingActivities.length})</h2>
+          <div className="activities-scrollable">
+            {pendingActivities.length > 0 ? (
+              pendingActivities.map((activity) => (
+                <div key={`pending-${activity.id}`} className="activity-card pending">
+                  <div className="activity-info">
+                    <p><strong>ФИО:</strong> {activity.full_name}</p>
+                    <p><strong>Группа:</strong> {activity.group_name}</p>
+                    <p><strong>Руководитель:</strong> {activity.supervisor}</p>
+                    <p><strong>Активность:</strong> {activity.activity}</p>
+                    {activity.file_name && (
+                      <img 
+                        src={`http://localhost:8000/uploads/${activity.file_name}`} 
+                        alt="Достижение" 
+                        className="activity-image"
+                      />
+                    )}
+                  </div>
+                  <div className="activity-actions">
+                    <button onClick={() => handleApprove(activity)} className="approve-btn">
+                      Принять
+                    </button>
+                    <button onClick={() => handleReject(activity)} className="reject-btn">
+                      Отклонить
+                    </button>
+                  </div>
+                </div>
+              ))
+            ) : (
+              <p className="no-activities">Нет заявок на рассмотрении</p>
+            )}
+          </div>
         </div>
 
-        <div className="approved-activities">
-          <h2>Принятые заявки</h2>
-          {approvedActivities.length > 0 ? (
-            <table>
-              <thead>
-                <tr>
-                  <th>ФИО</th>
-                  <th>Группа</th>
-                  <th>Руководитель</th>
-                  <th>Активность</th>
-                  <th>Фото</th>
-                </tr>
-              </thead>
-              <tbody>
-                {approvedActivities.map((activity) => (
-                  <tr key={`approved-${activity.id}`}>
-                    <td>{activity.full_name}</td>
-                    <td>{activity.group_name}</td>
-                    <td>{activity.supervisor}</td>
-                    <td>{activity.activity}</td>
-                    <td>
-                      {activity.file_name && (
-                        <img 
-                          src={`http://localhost:8000/uploads/${activity.file_name}`} 
-                          alt="Достижение" 
-                          width="300"
-                        />
-                      )}
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          ) : (
-            <p>Нет принятых заявок</p>
-          )}
+        <div className="activities-column approved-column">
+          <h2>Принятые заявки ({approvedActivities.length})</h2>
+          <div className="activities-scrollable">
+            {approvedActivities.length > 0 ? (
+              approvedActivities.map((activity) => (
+                <div key={`approved-${activity.id}`} className="activity-card approved">
+                  <div className="activity-info">
+                    <p><strong>ФИО:</strong> {activity.full_name}</p>
+                    <p><strong>Группа:</strong> {activity.group_name}</p>
+                    <p><strong>Руководитель:</strong> {activity.supervisor}</p>
+                    <p><strong>Активность:</strong> {activity.activity}</p>
+                    {activity.file_name && (
+                      <img 
+                        src={`http://localhost:8000/uploads/${activity.file_name}`} 
+                        alt="Достижение" 
+                        className="activity-image"
+                      />
+                    )}
+                  </div>
+                  <div className="activity-actions">
+                    <button 
+                      onClick={() => handleDeleteApproved(activity)} 
+                      className="reject-btn"
+                    >
+                      Удалить
+                    </button>
+                  </div>
+                </div>
+              ))
+            ) : (
+              <p className="no-activities">Нет принятых заявок</p>
+            )}
+          </div>
         </div>
-        <button 
-          onClick={handleLogout}
-          className="logout-btn"
-        >
-          Выйти в меню регистрации
-        </button>
       </div>
+      
+      <button onClick={handleLogout} className="logout-btn">
+        Выйти в меню регистрации
+      </button>
     </div>
   );
 }

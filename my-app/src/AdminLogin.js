@@ -1,3 +1,4 @@
+// AdminLogin.js
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
@@ -10,27 +11,40 @@ function AdminLogin() {
   const navigate = useNavigate();
   const [userType, setUserType] = useState('admin');
 
-  const validCredentials = [
-    { login: 'nevlaadislava', password: 'pass1' },
-    { login: 'sunnlxx', password: 'pikmi' },
-    { login: 'dimka', password: 'pass3' }
-  ];
+  // УДАЛЯЕМ ЭТОТ МАССИВ - он больше не нужен
+  // const validCredentials = [ ... ];
 
   const handleChange = (e) => {
     const { name, value } = e.target;
     setCredentials(prev => ({ ...prev, [name]: value }));
   };
 
-  const handleSubmit = (e) => {
+  // ИЗМЕНЯЕМ ФУНКЦИЮ ОБРАБОТКИ ОТПРАВКИ ФОРМЫ
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    const isValid = validCredentials.some(
-      cred => cred.login === credentials.login && cred.password === credentials.password
-    );
+    setError(''); // Сбрасываем предыдущие ошибки
 
-    if (isValid) {
-      navigate('/admin-panel');
-    } else {
-      setError('Неверный логин или пароль');
+    try {
+      const response = await fetch('http://localhost:8000/api/login', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(credentials),
+      });
+
+      if (response.ok) {
+        // Если статус ответа 2xx (успех)
+        navigate('/admin-panel');
+      } else {
+        // Если сервер вернул ошибку (например, 401)
+        const errorData = await response.json();
+        setError(errorData.detail || 'Произошла ошибка входа');
+      }
+    } catch (err) {
+      // Если произошла сетевая ошибка (сервер недоступен)
+      console.error('Login fetch error:', err);
+      setError('Ошибка подключения к серверу. Попробуйте позже.');
     }
   };
 
@@ -38,32 +52,31 @@ function AdminLogin() {
     navigate('/'); // Переход на главную страницу регистрации
   };
 
-
-    const handleUserTypeChange = (type) => {
-        setUserType(type);
-        if (type === 'user') {
-            navigate('/');
-        }
-    };
+  const handleUserTypeChange = (type) => {
+    setUserType(type);
+    if (type === 'user') {
+      navigate('/');
+    }
+  };
 
   return (
     <div className="login-container">
       <div className="user-type-selector">
-          <button 
-            className={`user-type-btn ${userType === 'user' ? 'active' : ''}`}
-            onClick={() => handleUserTypeChange('user')}
-            type="button"
-          >
-            Пользователь
-          </button>
-          <button 
-            className={`user-type-btn ${userType === 'admin' ? 'active' : ''}`}
-            onClick={() => handleUserTypeChange('admin')}
-            type="button"
-          >
-            Администратор
-          </button>
-        </div>
+        <button
+          className={`user-type-btn ${userType === 'user' ? 'active' : ''}`}
+          onClick={() => handleUserTypeChange('user')}
+          type="button"
+        >
+          Пользователь
+        </button>
+        <button
+          className={`user-type-btn ${userType === 'admin' ? 'active' : ''}`}
+          onClick={() => handleUserTypeChange('admin')}
+          type="button"
+        >
+          Администратор
+        </button>
+      </div>
       <h1>Вход для администратора</h1>
       <form onSubmit={handleSubmit}>
         <div className="form-group">
